@@ -36,17 +36,22 @@ steps:
     tags:
       - python
       - dashboard
+      - workflow
     instance_type: large
     commands:
-      - bazel run //ci/ray_ci:test_in_docker -- //python/ray/tests/... //python/ray/dag/... python/ray/autoscaler/v2/... core
+      - bazel run //ci/ray_ci:test_in_docker -- //python/ray/tests/... //python/ray/dag/... python/ray/autoscaler/v2/... //python/ray/workflow/... core
         --run-high-impact-tests
         --parallelism-per-worker 3 
         --except-tags debug_tests,asan_tests,post_wheel_build,ha_integration,mem_pressure,tmpfs,container,manual
+      - bazel run //ci/ray_ci:test_in_docker -- //python/ray/tests/... //python/ray/dag/... python/ray/autoscaler/v2/... //python/ray/workflow/... core
+        --run-high-impact-tests
+        --only-tags use_all_core --skip-ray-installation
 
   - label: ":ray: core: python tests"
     tags:
       - python
       - dashboard
+    if: build.pull_request.labels includes "go"
     instance_type: large
     parallelism: 4
     commands:
@@ -107,6 +112,7 @@ steps:
     tags:
       - python
       - workflow
+    if: build.pull_request.labels includes "go"
     instance_type: medium
     parallelism: 2
     commands:
